@@ -56,7 +56,7 @@ if __name__ == '__main__':
         #该用户密码
         password = 'admin'
         #tftp服务器地址
-        ftphost ='10.200.32.11'
+        ftphost ='192.168.32.11'
         filename = ip.replace('.','-')+ '-'+datetime.date.today().strftime('%Y%m%d')+'.bak.cfg'
         command1 = 'backup startup-configuration to ' +(ftphost)+' '+ filename        
         telnet_client = TelnetClient()
