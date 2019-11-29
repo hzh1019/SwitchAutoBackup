@@ -2,6 +2,7 @@ import logging
 import telnetlib
 import time
 import datetime
+from multiprocessing import Pool
 
 
 class TelnetClient():
@@ -48,7 +49,18 @@ class TelnetClient():
     def logout_host(self):
         self.tn.write(b"quit\n")
 
+#执行交换机备份
+def switchbak(i,u,p,c):
+    telnet_client = TelnetClient()
+    if telnet_client.login_host(i,u,p) :
+        telnet_client.execute_some_command(c)
+        telnet_client.logout_host() 
+
 if __name__ == '__main__':
+    print('开始多进程并发备份')
+    start=time.time()
+    #50为进程数，用户可根据客户端及服务器配置自行调整，注意：过大进程易被安全软件识别为恶意攻击
+    p=Pool(50)
     for ip in open('switchs.txt').readlines():
         ip=ip.strip()        
         #交换机具备backup命令的telnet用户
@@ -58,9 +70,9 @@ if __name__ == '__main__':
         #tftp服务器地址
         ftphost ='192.168.32.11'
         filename = ip.replace('.','-')+ '-'+datetime.date.today().strftime('%Y%m%d')+'.bak.cfg'
-        command1 = 'backup startup-configuration to ' +(ftphost)+' '+ filename        
-        telnet_client = TelnetClient()
-        # 如果登录结果返加True，则执行命令，然后退出
-        if telnet_client.login_host(ip,username,password):
-            telnet_client.execute_some_command(command1)
-            telnet_client.logout_host()
+        command1 = 'backup startup-configuration to ' +(ftphost)+' '+ filename  
+        p.apply_async(switchbak,args=(ip,username,password,command1))            
+    p.close()
+    p.join()
+    end=time.time()
+    print('备份完成，耗时：%0.2f 秒' %(end-start) )
