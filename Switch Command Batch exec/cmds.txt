@@ -1,0 +1,11 @@
+sys
+ssh server enable
+local-user admin
+password simple boE6Wzjv
+local-user it
+password simple FD39@fs..2!
+authorization-attribute user-role level-1
+service-type ssh
+clock timezone UTC add 8
+ntp-service unicast-server 192.168.12.10
+save f
